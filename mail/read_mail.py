@@ -2,6 +2,7 @@ import imaplib
 import email
 from email.header import decode_header
 import time
+from bs4 import BeautifulSoup
 
 # Почтовые данные
 IMAP_SERVER = 'imap.gmail.com'
@@ -17,6 +18,20 @@ def decode_mime_words(s):
         else:
             decoded_string += word
     return decoded_string
+
+
+def extract_text_from_html(html):
+    soup = BeautifulSoup(html, 'html.parser')
+
+    # Замена тегов <br> и <p> на новые строки для лучшего форматирования
+    for br in soup.find_all('br'):
+        br.replace_with('\n')
+    for p in soup.find_all('p'):
+        p.insert_before('\n')
+        p.insert_after('\n')
+
+    text = soup.get_text(separator='\n', strip=True)
+    return text
 
 
 def check_mail():
@@ -69,25 +84,29 @@ def check_mail():
                             if content_type == 'text/plain' and 'attachment' not in content_disposition:
                                 body = part_body
                                 break  # Остановиться после нахождения текстовой части
+                            elif content_type == 'text/html' and 'attachment' not in content_disposition:
+                                # Извлечь текст из HTML
+                                body = extract_text_from_html(part_body)
+                                break  # Остановиться после нахождения HTML части
                     else:
                         content_type = msg.get_content_type()
                         try:
                             body = msg.get_payload(decode=True).decode()
                         except:
                             body = '(Unable to decode body)'
+                        if content_type == 'text/html':
+                            # Извлечь текст из HTML
+                            body = extract_text_from_html(body)
 
                     if body:
                         print('Body:', body)
                     else:
-                        print('No text/plain body found')
+                        print('No text/plain or text/html body found')
 
         mail.close()
         mail.logout()
     except Exception as e:
         print(f'Error: {e}')
-
-
-
 
 if __name__ == "__main__":
     while True:
