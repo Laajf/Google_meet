@@ -2,7 +2,7 @@ import email
 import time
 from utils.titel_to_string import decode_mime_words
 from utils.body_email_to_string import extract_text_from_html
-import imaplib
+from utils.connect_and_find_mails import connect_to_mail_server,fetch_unseen_emails
 
 # Почтовые данные
 IMAP_SERVER = 'imap.gmail.com'
@@ -10,18 +10,7 @@ EMAIL_ACCOUNT = 'arttdydnik@gmail.com'
 PASSWORD = 'fyax omnj uobc fwve'
 
 
-def connect_to_mail_server():
-    """Подключение к почтовому серверу и аутентификация."""
-    mail = imaplib.IMAP4_SSL(IMAP_SERVER)
-    mail.login(EMAIL_ACCOUNT, PASSWORD)
-    mail.select('inbox')
-    return mail
 
-
-def fetch_unseen_emails(mail):
-    """Поиск непрочитанных писем и возвращение их ID."""
-    status, messages = mail.search(None, '(UNSEEN)')
-    return messages[0].split()
 
 
 def process_email(mail_id, mail):
@@ -83,7 +72,7 @@ def close_connection(mail):
 def check_mail():
     """Основная функция для проверки почты."""
     try:
-        mail = connect_to_mail_server()
+        mail = connect_to_mail_server(IMAP_SERVER, EMAIL_ACCOUNT, PASSWORD)
         mail_ids = fetch_unseen_emails(mail)
         for mail_id in mail_ids:
             process_email(mail_id, mail)
