@@ -1,8 +1,9 @@
-import imaplib
 import email
-from email.header import decode_header
 import time
-from bs4 import BeautifulSoup
+from utils.titel_to_string import decode_mime_words
+from utils.body_email_to_string import extract_text_from_html
+import imaplib
+
 
 # Почтовые данные
 IMAP_SERVER = 'imap.gmail.com'
@@ -10,33 +11,9 @@ EMAIL_ACCOUNT = 'arttdydnik@gmail.com'
 PASSWORD = 'fyax omnj uobc fwve'
 
 
-def decode_mime_words(s):
-    decoded_string = ''
-    for word, encoding in decode_header(s):
-        if isinstance(word, bytes):
-            decoded_string += word.decode(encoding if encoding else 'utf-8')
-        else:
-            decoded_string += word
-    return decoded_string
-
-
-def extract_text_from_html(html):
-    soup = BeautifulSoup(html, 'html.parser')
-
-    # Замена тегов <br> и <p> на новые строки для лучшего форматирования
-    for br in soup.find_all('br'):
-        br.replace_with('\n')
-    for p in soup.find_all('p'):
-        p.insert_before('\n')
-        p.insert_after('\n')
-
-    text = soup.get_text(separator='\n', strip=True)
-    return text
-
-
 def check_mail():
     try:
-        # Подключение к серверу
+
         mail = imaplib.IMAP4_SSL(IMAP_SERVER)
         mail.login(EMAIL_ACCOUNT, PASSWORD)
         mail.select('inbox')
@@ -108,7 +85,9 @@ def check_mail():
     except Exception as e:
         print(f'Error: {e}')
 
+
 if __name__ == "__main__":
+    print("Запуск проверки почты")
     while True:
         check_mail()
         time.sleep(1)  # Проверять почту каждые 60 секунд
