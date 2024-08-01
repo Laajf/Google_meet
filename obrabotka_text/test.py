@@ -1,15 +1,8 @@
 import requests
-from transformers import AutoTokenizer, AutoModel
-import torch
-import sys
-import io
-
-# Установка кодировки вывода
-sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding='utf-8')
-
+from sentence_transformers import SentenceTransformer, util
+#from notion
 # Загрузка модели для извлечения признаков
-tokenizer = AutoTokenizer.from_pretrained("sentence-transformers/all-MiniLM-L6-v2")
-model = AutoModel.from_pretrained("sentence-transformers/all-MiniLM-L6-v2")
+model = SentenceTransformer('all-Mpnet-base-v2')
 
 
 def search_notion(secret_key, query, page_size=100):
@@ -17,7 +10,7 @@ def search_notion(secret_key, query, page_size=100):
 
     payload = {
         "query": query,
-        "page_size": page_size
+        #"page_size": page_size
     }
 
     headers = {
@@ -28,25 +21,21 @@ def search_notion(secret_key, query, page_size=100):
     }
 
     response = requests.post(url, json=payload, headers=headers)
-    return response.json()
+
+    # Распечатываем полный ответ для отладки
+    print("API Response:", response.json())
+
+    # Проверяем, есть ли ключ 'results'
+    response_data = response.json()
+    if 'results' not in response_data:
+        raise KeyError("Ключ 'results' не найден в ответе API Notion.")
+
+    return response_data
 
 
-def get_text_embedding(text):
-    inputs = tokenizer(text, return_tensors='pt', truncation=True, padding=True)
-    outputs = model(**inputs)
-    embeddings = outputs.last_hidden_state.mean(dim=1)
-    return embeddings
-
-
-def cosine_similarity_tensor(a, b):
-    dot_product = torch.matmul(a, b.T)
-    norm_a = a.norm(dim=1).unsqueeze(1)
-    norm_b = b.norm(dim=1).unsqueeze(0)
-    return dot_product / (norm_a * norm_b)
-
-
-def find_most_similar_notion_page(combined_text, notion_pages, similarity_threshold=0.2):
-    text_embedding = get_text_embedding(combined_text)
+def find_most_similar_notion_page(combined_text, notion_pages, similarity_threshold=0.1):
+    # Создание векторного представления текста
+    text_embedding = model.encode(combined_text, convert_to_tensor=True)
 
     max_similarity = 0
     best_page = None
@@ -58,8 +47,10 @@ def find_most_similar_notion_page(combined_text, notion_pages, similarity_thresh
         page_content_text = ' '.join([r.get('text', {}).get('content', '') for r in page_content])
 
         page_text = f"{page_title} {page_content_text}"
-        page_embedding = get_text_embedding(page_text)
-        similarity_score = cosine_similarity_tensor(text_embedding, page_embedding).item()
+        page_embedding = model.encode(page_text, convert_to_tensor=True)
+
+        # Вычисление сходства
+        similarity_score = util.pytorch_cos_sim(text_embedding, page_embedding).item()
 
         if similarity_score > max_similarity:
             max_similarity = similarity_score
@@ -87,7 +78,13 @@ def main(secret_key, meetgeek_transcript):
 
     # Шаг 2: Поиск страниц в Notion
     notion_data = search_notion(secret_key, "")
-    notion_pages = notion_data['results']
+
+    # Обработка ответа от API
+    notion_pages = notion_data.get('results', [])
+
+    if not notion_pages:
+        print("Не удалось найти страницы в Notion.")
+        return
 
     # Шаг 3: Поиск наиболее похожей страницы
     similar_page = find_most_similar_notion_page(combined_text, notion_pages)
@@ -96,6 +93,7 @@ def main(secret_key, meetgeek_transcript):
         print(f"Текст из MeetGeek:\n{combined_text}\n")
         print(f"Наиболее похожая страница в Notion:\n{similar_page['properties']['title']['title'][0]['plain_text']}\n")
         print(f"URL: {similar_page['url']}\n")
+        return similar_page['url']
     else:
         print("Нет подходящей страницы в Notion.")
 
@@ -106,7 +104,7 @@ if __name__ == "__main__":
     meetgeek_transcript = """
     00:00
 
-    google meet неплохой сервис для работы с звонками
+    NOTION API хороший инструмент для работы    
     ...
 
     30:52
