@@ -16,6 +16,7 @@ def process_email(mail_id, mail):
             body = extract_body_from_message(msg)
             if body:
                 print('Body:', body)
+                return body
             else:
                 print('No text/plain or text/html body found')
 

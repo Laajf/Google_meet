@@ -9,6 +9,7 @@
     <option name="namespacePackageFolders">
       <list>
         <option value="$MODULE_DIR$/mail" />
+        <option value="$MODULE_DIR$/obrabotka_text" />
       </list>
     </option>
   </component>

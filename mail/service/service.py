@@ -9,11 +9,17 @@ PASSWORD = 'fyax omnj uobc fwve'
 
 def check_mail():
     """Основная функция для проверки почты."""
+    global body
     try:
+        body = None
         mail = connect_to_mail_server(IMAP_SERVER, EMAIL_ACCOUNT, PASSWORD)
         mail_ids = fetch_unseen_emails(mail)
         for mail_id in mail_ids:
-            process_email(mail_id, mail)
+            body = process_email(mail_id, mail)
         close_connection(mail)
+        if body is None:
+            pass
+        else:
+            return body
     except Exception as e:
         print(f'Error: {e}')
