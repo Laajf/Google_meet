@@ -2,18 +2,24 @@ import time
 # from service.service import check_mail
 from mail.service.service import check_mail
 from obrabotka_text.service.service import main
+from obrabotka_text.utils.url_to_page_id import url_to_id
+from notion.utils.create_comment import create_comment
+from obrabotka_text.utils.text_compression import compress_text
 
 def run_mail():
-    print("Запуск сервера")
+    print("Запуск сервера", flush=True)
     try:
         while True:
             body = check_mail()
+            body_save = body
             if body is not None:
                 print(body)
                 secret_key = "secret_Ru3ArATfhvqadwy8KGZWPcJgKVDocWDIL8xvGrjt8Gh"
 
-                url = main(secret_key= secret_key,meetgeek_transcript=body)
-                print(url)
+                url = main(secret_key=secret_key, meetgeek_transcript=body)
+                page_id = url_to_id(url)
+                body_save = compress_text(body_save)
+                create_comment(page_id, body_save)
             time.sleep(1)
     except Exception as e:
         print(f'Error: {e}')

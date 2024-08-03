@@ -1,0 +1,19 @@
+[tool.poetry]
+name = "gogle-meet-mail"
+version = "0.1.0"
+description = ""
+authors = ["Laajf <krym4rtem@yandex.ru>"]
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python = "^3.12"
+bs4 = "^0.0.2"
+requests = "^2.32.3"
+torch = "2.2.2"
+sentence-transformers = "^3.0.1"
+numpy = "<2.0"
+
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"

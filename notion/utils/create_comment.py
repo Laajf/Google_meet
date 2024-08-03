@@ -1,6 +1,8 @@
 import requests
 import json
-def create_comment(PAGE_ID):
+
+
+def create_comment(PAGE_ID, text):
     # URL для создания комментария
     url = "https://api.notion.com/v1/comments"  # Замените на актуальный эндпоинт
 
@@ -9,7 +11,8 @@ def create_comment(PAGE_ID):
         "accept": "application/json",
         "Notion-Version": "2022-06-28",
         "content-type": "application/json",
-        "Authorization": "Bearer secret_Ru3ArATfhvqadwy8KGZWPcJgKVDocWDIL8xvGrjt8Gh"  # Замените на ваш новый секретный токен
+        "Authorization": "Bearer secret_Ru3ArATfhvqadwy8KGZWPcJgKVDocWDIL8xvGrjt8Gh"
+        # Замените на ваш новый секретный токен
     }
 
     # Тело запроса с данными комментария
@@ -21,7 +24,7 @@ def create_comment(PAGE_ID):
             {
                 "type": "text",
                 "text": {
-                    "content": "тест комментария"  # Содержание комментария
+                    "content": f"{text}"  # Содержание комментария
                 }
             }
         ]
