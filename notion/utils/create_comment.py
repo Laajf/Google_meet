@@ -1,17 +1,20 @@
 import requests
 import json
-
+from for_user.utils.json_to_variable import get_config_value
 
 def create_comment(PAGE_ID, text):
     # URL для создания комментария
     url = "https://api.notion.com/v1/comments"  # Замените на актуальный эндпоинт
+
+
+    secret_key = get_config_value("secret_key")
 
     # Заголовки запроса
     headers = {
         "accept": "application/json",
         "Notion-Version": "2022-06-28",
         "content-type": "application/json",
-        "Authorization": "Bearer secret_Ru3ArATfhvqadwy8KGZWPcJgKVDocWDIL8xvGrjt8Gh"
+        "Authorization": f"Bearer {secret_key}"
         # Замените на ваш новый секретный токен
     }
 
