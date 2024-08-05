@@ -12,7 +12,7 @@ def compress_text(text, max_length=2000):
     if len(text) <= max_length:
         return text
 
-    # Используем функцию shorten для обрезки текста до нужной длины с сохранением структуры
+    # Используем функцию shorten для обрезкиq текста до нужной длины с сохранением структуры
     # Убедимся, что мы не обрезаем слова
     compressed_text = shorten(text, width=max_length, placeholder="...")
 
