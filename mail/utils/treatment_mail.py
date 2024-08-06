@@ -7,7 +7,7 @@ from_ = ""
 
 def process_email(mail_id, mail):
     """Обработка отдельного письма по его ID."""
-
+    global from_
     status, msg_data = mail.fetch(mail_id, '(RFC822)')
     for response_part in msg_data:
         if isinstance(response_part, tuple):
