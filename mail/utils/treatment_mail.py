@@ -2,10 +2,12 @@ from .titel_to_string import decode_mime_words
 from .body_email_to_string import extract_text_from_html
 import email
 
+from_ = ""
+
 
 def process_email(mail_id, mail):
     """Обработка отдельного письма по его ID."""
-    global from_
+
     status, msg_data = mail.fetch(mail_id, '(RFC822)')
     for response_part in msg_data:
         if isinstance(response_part, tuple):
