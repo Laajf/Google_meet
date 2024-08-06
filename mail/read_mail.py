@@ -8,16 +8,19 @@ from obrabotka_text.utils.text_compression import compress_text
 from for_user.utils.json_to_variable import get_config_value
 from mail.utils import treatment_mail
 from mail.utils.string_to_email import string_to_email
+from obrabotka_text.utils.obrezka_text import clean_text
 
 
 def run_mail():
+    k = 0
     print("Запуск сервера", flush=True)
     try:
         while True:
             body = check_mail()
             body_save = body
-            if body is not None:
-                print(body)
+            body_save = clean_text(body_save)
+            if body_save is not None:
+                # print(body)
                 secret_key = get_config_value('secret_key')
 
                 url = main(secret_key=secret_key, meetgeek_transcript=body)
@@ -30,6 +33,16 @@ def run_mail():
                     create_comment(page_id, body_save)
                 else:
                     print("Недопустимый email")
+
+            # алгоритм для индикации запуска сервера
+            if k == 0:
+                # print(k, flush=True)
+                print("Сервер запущен", flush=True)
+                k += 1
+
+            elif k > 1:
+                pass
+
             time.sleep(1)
     except Exception as e:
         print(f'Error: {e}')
