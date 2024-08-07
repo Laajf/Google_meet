@@ -8,7 +8,7 @@ from obrabotka_text.utils.text_compression import compress_text
 from for_user.utils.json_to_variable import get_config_value
 from mail.utils import treatment_mail
 from mail.utils.string_to_email import string_to_email
-from obrabotka_text.utils.obrezka_text import clean_text
+from obrabotka_text.utils.obrezka_text import extract_text_between_timestamps
 
 
 def run_mail():
@@ -18,19 +18,24 @@ def run_mail():
         while True:
             body = check_mail()
             body_save = body
-            body_save = clean_text(body_save)
+            # body_save = extract_text_between_timestamps(body_save) этот код обрезает
             if body_save is not None:
+                body_mas = extract_text_between_timestamps(body)  # это массив
                 # print(body)
                 secret_key = get_config_value('secret_key')
 
-                url = main(secret_key=secret_key, meetgeek_transcript=body)
-                page_id = url_to_id(url)
-                body_save = compress_text(body_save)
-
-                # print(f"{treatment_mail.from_}")
+                # проверка пользователя
                 string_email = string_to_email(treatment_mail.from_)
-                if string_email == "app@meetgeek.ai":
-                    create_comment(page_id, body_save)
+                # if string_email == "app@meetgeek.ai":
+                if string_email == "crymov.artyom@yandex.ru":
+                    # получение ссылки
+                    for i in body_mas:
+                        url = main(secret_key=secret_key, meetgeek_transcript=i)
+                        page_id = url_to_id(url)
+                        body_save = compress_text(i)
+
+                        # print(f"{treatment_mail.from_}")
+                        create_comment(page_id, i)
                 else:
                     print("Недопустимый email")
 
